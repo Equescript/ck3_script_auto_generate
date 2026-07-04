@@ -13,8 +13,8 @@ def curly_braces(indent_count: int, prefix: str, contents: list[str], add_line_f
         str: 格式化后的p语言字符串。
 
     Examples:
-        >>> curly_braces(0, "key", ["str1", "str1"])
-        'key = {\\n    str1\\n    str1\\n}'
+        >>> curly_braces(0, "key", ["str1", "str2"])
+        'key = {\\n    str1\\n    str2\\n}'
         key = {
             str1
             str2

@@ -1,6 +1,7 @@
 INDENT = "    "
 
 def curly_braces(indent_count: int, prefix: str, contents: list[str], add_line_feed_for_conetents: bool=True) -> str:
+    """ 将字符串格式化为p语言脚本的常用花括号格式 """
     indent = INDENT * indent_count
     # if add_line_feed_for_conetents:
     #     contents = "".join(["\n" if ignore_empty_line and content=="" else f"{indent}{INDENT}{content}\n" for content in contents])

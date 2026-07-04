@@ -1,0 +1,73 @@
+﻿namespace = gal_event_intro_scene
+
+gal_event_intro_scene.0001 = {
+    type = character_event
+    theme = court
+    title = gal_event_intro_scene.0001.t
+    desc = gal_event_intro_scene.0001.desc
+    
+    left_portrait = {
+        character = root
+        animation = flirtation
+    }
+    right_portrait = {
+        character = scope:recipient
+        animation = interested_left
+    }
+    
+    option = {
+        name = gal_event_intro_scene.0001.option.a
+        scope:recipient = {
+            change_variable = {
+                name = gal_attraction
+                add = 5
+            }
+        }
+        # Some Other Action
+        trigger_event = gal_event_intro_scene.0001
+    }
+    option = {
+        name = gal_event_intro_scene.0001.option.b
+        scope:recipient = {
+            change_variable = {
+                name = gal_attraction
+                add = -5
+            }
+        }
+        # Some Other Action
+        trigger_event = gal_event_intro_scene.0001
+    }
+    option = {
+        name = gal_event_intro_scene.0001.option.c
+        trigger_event = gal_event_intro_scene.0002
+    }
+    option = {
+        name = gal_event_intro_scene.0001.option.d
+    }
+}
+
+gal_event_intro_scene.0002 = {
+    type = character_event
+    theme = court
+    title = gal_event_intro_scene.0002.t
+    desc = gal_event_intro_scene.0002.desc
+    
+    left_portrait = {
+        character = root
+        animation = flirtation
+    }
+    right_portrait = {
+        character = scope:recipient
+        animation = interested_left
+    }
+    
+    option = {
+        name = gal_event_intro_scene.0002.option.a
+    }
+    option = {
+        name = gal_event_intro_scene.0002.option.b
+        scope:recipient = {
+            gal_effect_disable_my_galgame = yes
+        }
+    }
+}

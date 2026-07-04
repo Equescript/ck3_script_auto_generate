@@ -7,30 +7,31 @@ def curly_braces(indent_count: int, prefix: str, contents: list[str], add_line_f
     Args:
         indent_count (int): 控制开头缩进的数量。0代表无缩写。
         prefix (str): 前缀。
-        contents (list[str]): 花括号里的具体内容，list中的每一个str都代表一行。
+        contents (list[str]): 花括号里的具体内容，list中的每一个str都代表一行，注意这些str被假定没有前缀和后缀的缩进空格。
         add_line_feed_for_conetents (bool): 是否在每一行后都添加换行，设置成false的话就会被压缩到一行。
     Returns:
         str: 格式化后的p语言字符串。
 
     Examples:
         >>> curly_braces(0, "key", ["str1", "str2"])
-        'key = {\\n    str1\\n    str2\\n}'
+        'key = {\\n        str1\\n        str2\\n    }'
+        p语言中显示为：
         key = {
-            str1
-            str2
-        }
+                str1
+                str2
+            }
+        注意第一行的key之前没有缩进，这是为了方便嵌套格式化，参考函数的contents参数
     """
     indent = INDENT * indent_count
-    # if add_line_feed_for_conetents:
-    #     contents = "".join(["\n" if ignore_empty_line and content=="" else f"{indent}{INDENT}{content}\n" for content in contents])
-    # else:
-    #     contents = "".join(["\n" if ignore_empty_line and content=="\n" else f"{indent}{INDENT}{content}" for content in contents])
     if add_line_feed_for_conetents:
-        contents_joined = "".join([f"{indent}{INDENT}{content}\n" for content in contents])
+        contents_joined = "\n"+"".join([f"{indent}{INDENT}{content}\n" for content in contents])+indent
     else:
-        contents_joined = "".join([f"{indent}{INDENT}{content}" for content in contents])
-    return f"{prefix} = {{\n{contents_joined}{indent}}}"
+        contents_joined = "".join([f"{INDENT}{content}" for content in contents])+INDENT
+    return f"{prefix} = {{{contents_joined}}}"
 
 
 def localization_yml(localization: list[tuple[str, str]]) -> str:
     return "l_simp_chinese:\n "+"\n ".join([f"{k}: \"{v.replace("\n", "\\n")}\"" for k, v in localization])
+
+if __name__ == "__main__":
+    print(curly_braces(1, "key", ["str1", "str2"], False))

@@ -9,17 +9,12 @@ class LimitBase(ABC):
     def is_satisfied(self) -> bool:
         pass
     @abstractmethod
-    def format(self, indent_count: int) -> str:
-        pass
+    def format(self, indent_count: int) -> str: pass
 
 class Limit(LimitBase):
-    # scope: str
-    # def set_scope(self, scope: str):
-        # self.scope = scope
-    def is_satisfied(self) -> bool:
-        raise
-    def format(self, indent_count: int) -> str:
-        raise
+    """ 就是包装了一下，保证如果调用没有实现的execute和format方法时会报错。 """
+    def is_satisfied(self) -> bool: raise
+    def format(self, indent_count: int) -> str: raise
 
 class LiteralLimit(Limit):
     limit: str

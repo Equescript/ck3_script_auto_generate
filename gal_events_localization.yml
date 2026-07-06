@@ -1,0 +1,11 @@
+﻿l_simp_chinese:
+ gal_event_intro_scene.0001.t: "My Galgame Title"
+ gal_event_intro_scene.0001.desc: "My Galgame 初始互动界面"
+ gal_event_intro_scene.0001.option.a: "增加5好感"
+ gal_event_intro_scene.0001.option.b: "减少5好感"
+ gal_event_intro_scene.0001.option.c: "下一个事件"
+ gal_event_intro_scene.0001.option.d: "结束事件"
+ gal_event_intro_scene.0002.t: "My Galgame Title"
+ gal_event_intro_scene.0002.desc: "My Galgame 初始互动界面"
+ gal_event_intro_scene.0002.option.a: "结束事件"
+ gal_event_intro_scene.0002.option.b: "结束My Galgame互动"

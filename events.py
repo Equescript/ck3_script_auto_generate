@@ -6,9 +6,9 @@ from ck3_script_generator.ck3_backend_definitions.event import *
 from effects import *
 
 GalTestEvent = EventNamespace("gal_event_intro_scene", [
-Event("gal_event_intro_scene", 1, "character_event", "court", [
-        Portrait("left_portrait", "root", "flirtation"),
-        Portrait("right_portrait", "scope:recipient", "interested_left"),
+Event(1, EventType.character_event, "court", [
+        Portrait(PortraitPos.left_portrait, "root", "flirtation"),
+        Portrait(PortraitPos.right_portrait, "scope:recipient", "interested_left"),
     ],
     "My Galgame Title",
     "My Galgame 初始互动界面",
@@ -27,9 +27,9 @@ Event("gal_event_intro_scene", 1, "character_event", "court", [
         Option("结束事件"),
     ]
 ),
-Event("gal_event_intro_scene", 2, "character_event", "court", [
-        Portrait("left_portrait", "root", "flirtation"),
-        Portrait("right_portrait", "scope:recipient", "interested_left"),
+Event(2, EventType.character_event, "court", [
+        Portrait(PortraitPos.left_portrait, "root", "flirtation"),
+        Portrait(PortraitPos.right_portrait, "scope:recipient", "interested_left"),
     ],
     "My Galgame Title",
     "My Galgame 初始互动界面",

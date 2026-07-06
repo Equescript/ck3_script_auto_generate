@@ -29,9 +29,5 @@ def curly_braces(indent_count: int, prefix: str, contents: list[str], add_line_f
         contents_joined = "".join([f"{INDENT}{content}" for content in contents])+INDENT
     return f"{prefix} = {{{contents_joined}}}"
 
-
-def localization_yml(localization: list[tuple[str, str]]) -> str:
-    return "l_simp_chinese:\n "+"\n ".join([f"{k}: \"{v.replace("\n", "\\n")}\"" for k, v in localization])
-
 if __name__ == "__main__":
     print(curly_braces(1, "key", ["str1", "str2"], False))

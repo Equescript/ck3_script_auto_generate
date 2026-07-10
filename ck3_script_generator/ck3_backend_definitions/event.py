@@ -29,26 +29,26 @@ class Portrait:
 
 class Option:
     """ 用来储存事件选项的相关数据 """
-    name: LocalizedStr
+    name: Localization
     action: Action|None
     # event_ref: int|str|None
-    localization: tuple[str, str]
+    # localization: tuple[str, str]
     def __init__(self, name: LocalizedStr, action: list[Action]|Action|None=None):
         """
         Args:
             name (LocalizedStr): 选项名称，可以直接写本地化字符串
             action (list[Action] | Action | None): 选项会执行的操作，可以不填，默认为None，即不执行任何操作。
         """
-        self.name = name
+        self.name = Localization.from_LocalizedStr(name)
         # 初始化的时候直接就把list[Action]转化成Actions类了，这样就可以都作为一个单独的Action处理，非常方便
         self.action = Actions(action) if isinstance(action, list) else action
         # self.event_ref = event_ref
     def format(self, indent_count: int, event_key: str, option_key: str) -> str:
-        full_option_key = f"{event_key}.option.{option_key}"
-        contents = [f"name = {full_option_key}"]
+        self.name._key = f"{event_key}.option.{option_key}"
+        contents = [f"name = {self.name.key}"]
         if self.action is not None:
             contents.append(self.action.format(indent_count+1))
-        self.localization = (full_option_key, self.name)
+        # self.localization = (full_option_key, self.name)
         return curly_braces(indent_count, "option", contents)
 
 class EventType(StrEnum):
@@ -64,12 +64,12 @@ class Event:
     index: int
     event_type: EventType
     theme: str
-    title: LocalizedStr
-    description: LocalizedStr
+    title: Localization
+    description: Localization
     portraits: list[Portrait]
     options: list[Option]
 
-    localizations: dict[str, str]
+    # localizations: dict[str, Localization]
     def __init__(self, index: int, event_type: EventType, theme: str, portraits: list[Portrait], title: LocalizedStr, description: LocalizedStr, options: list[Option]):
         """
         Args:
@@ -85,27 +85,24 @@ class Event:
         self.index = index
         self.event_type = event_type
         self.theme = theme
-        self.title = title
-        self.description = description
+        self.title = Localization.from_LocalizedStr(title)
+        self.description = Localization.from_LocalizedStr(description)
         self.portraits = portraits
         self.options = options
 
-        self.localizations = {}
+        # self.localizations = {}
     def option_format(self, event_key: str, o: Option, i: int) -> str:
         return o.format(1, event_key, chr(97+i))
     def format(self, name_space: str) -> str:
         # 构建P语言的key
         event_key = f"{name_space}.{self.index:04d}"
-        event_title_key = f"{event_key}.t"
-        event_desc_key = f"{event_key}.desc"
-        # 生成localization键值对
-        self.localizations[event_title_key] = self.title
-        self.localizations[event_desc_key] = self.description
+        self.title._key = f"{event_key}.t"
+        self.description._key = f"{event_key}.desc"
         return curly_braces(0, event_key, list(chain([
             f"type = {self.event_type}",
             f"theme = {self.theme}",
-            f"title = {event_title_key}",
-            f"desc = {event_desc_key}",
+            f"title = {self.title.key}",
+            f"desc = {self.description.key}",
             ], [""],
             [p.format(1) for p in self.portraits], [""],
             [self.option_format(event_key, o, i) for i, o in enumerate(self.options)]
@@ -121,8 +118,8 @@ class EventNamespace:
         self.events = dict([(e.index, e) for e in events])
     def format(self) -> str:
         return f"namespace = {self.name_space}\n\n"+"\n\n".join([e.format(self.name_space) for e in self.events.values()])
-    def localization(self) -> str:
-        return localization_yml(DEFAULT_LOCALIZATION_TARGET, [kv for e in self.events.values() for kv in chain(e.localizations.items(), [option.localization for option in e.options])])
+    def localization(self, language: str) -> str:
+        return localization_yml(language, [kv for e in self.events.values() for kv in chain([e.title.get_localization_pair(language), e.description.get_localization_pair(language)], [option.name.get_localization_pair(language) for option in e.options])])
         # return [kv for e in self.events.values() for kv in list(e.localizations.items()).append([option.localization for option in e.options])]
     # def generate(self, event_path: str, localization_path: str):
     #     event_data = f"namespace = {self.name_space}\n\n"+"\n\n".join([e.format(self.name_space) for e in self.events.values()])

@@ -14,6 +14,7 @@ class ScopeContext:
         self.variables = variables
 
 class Context:
+    """ 来自早期设计想法：直接用python代码模拟P语言运行，以及时找出问题，现在这个想法过于复杂，已经被放弃，可以忽略这个方法。 """
     scope: ScopeContext
     event_namespace: dict[str, EventNamespace]
     next_event_key: str|None

@@ -7,6 +7,7 @@ class LimitBase(ABC):
         # pass
     @abstractmethod
     def is_satisfied(self) -> bool:
+        """ 来自早期设计想法：直接用python代码模拟P语言运行，以及时找出问题，现在这个想法过于复杂，已经被放弃，可以忽略这个方法。 """
         pass
     @abstractmethod
     def format(self, indent_count: int) -> str: pass

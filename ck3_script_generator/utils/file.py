@@ -15,6 +15,7 @@ def write_json(file_path: str, json_data):
         json_file.close()
 
 def write_file(file_path: str, data: str):
+    """ CK3脚本使用UTF-8 with BOM编码，即Python写入文件编码utf-8-sig """
     with open(file_path, 'w', encoding="utf-8-sig") as file:
         file.write(data)
         file.close()

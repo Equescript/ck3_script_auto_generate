@@ -15,6 +15,7 @@ class Localization:
     chinese: str
     english: str
     def __init__(self, *, chinese: str, english: str=""):
+        """ 必须使用关键字参数 """
         self._key = None
         self.chinese = chinese
         self.english = english

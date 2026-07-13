@@ -16,16 +16,16 @@ class Portrait:
     """ 用来储存事件界面中显示的角色的相关数据 """
     portrait_pos: PortraitPos
     character: str
-    animation: str
-    def __init__(self, portrait_pos: PortraitPos, character: str, animation: str):
+    animation: str|None
+    def __init__(self, portrait_pos: PortraitPos, character: str, animation: str=None):
         self.portrait_pos = portrait_pos
         self.character = character
         self.animation = animation
     def format(self, indent_count: int) -> str:
-        return curly_braces(indent_count, self.portrait_pos, [
-            f"character = {self.character}",
-            f"animation = {self.animation}",
-        ])
+        if self.animation is None:
+            return f"{self.portrait_pos} = {self.character}"
+        else:
+            return curly_braces(indent_count, self.portrait_pos, [f"character = {self.character}", f"animation = {self.animation}"])
 
 class Option:
     """ 用来储存事件选项的相关数据 """
@@ -61,25 +61,27 @@ class EventType(StrEnum):
 
 class Event:
     """ P语言的Event对象，必须被包裹在一个EventNamespace中使用，否则将没有name_space """
-    index: int
+    index: str
     event_type: EventType
     theme: str
     title: Localization
     description: Localization
     portraits: list[Portrait]
     options: list[Option]
+    others: list[str]
 
     # localizations: dict[str, Localization]
-    def __init__(self, index: int, event_type: EventType, theme: str, portraits: list[Portrait], title: LocalizedStr, description: LocalizedStr, options: list[Option]):
+    def __init__(self, index: str, event_type: EventType, *, theme: str="default", portraits: Portrait|list[Portrait]=[], title: LocalizedStr, description: LocalizedStr, options: list[Option], others: list[str]=[]):
         """
         Args:
             index (int): 事件索引，被格式化填充到四位，例如1会被填充成0001。
             event_type (EventType): 事件类型。
-            theme (str): 参考https://ck3.paradoxwikis.com/Event_modding#Themes
-            portraits (list[Portrait]): 出现在事件界面的头像列表
+            theme (str): 参考Crusader Kings III/game/common/event_themes/00_event_themes.txt
+            portraits (Portrait | list[Portrait]): 出现在事件界面的头像列表
             title (LocalizedStr): 标题，可以直接写本地化字符串
             description (LocalizedStr): 事件内容描述，可以直接写本地化字符串
             options (list[Option]): 事件选项
+            others (list[str]): 没有包括在
         """
         # self.name_space = name_space
         self.index = index
@@ -87,7 +89,7 @@ class Event:
         self.theme = theme
         self.title = Localization.from_LocalizedStr(title)
         self.description = Localization.from_LocalizedStr(description)
-        self.portraits = portraits
+        self.portraits = [portraits] if isinstance(portraits, Portrait) else portraits
         self.options = options
 
         # self.localizations = {}
@@ -95,7 +97,8 @@ class Event:
         return o.format(1, event_key, chr(97+i))
     def format(self, name_space: str) -> str:
         # 构建P语言的key
-        event_key = f"{name_space}.{self.index:04d}"
+        # event_key = f"{name_space}.{self.index:04d}"
+        event_key = f"{name_space}.{self.index}"
         self.title._key = f"{event_key}.t"
         self.description._key = f"{event_key}.desc"
         return curly_braces(0, event_key, list(chain([
@@ -105,7 +108,8 @@ class Event:
             f"desc = {self.description.key}",
             ], [""],
             [p.format(1) for p in self.portraits], [""],
-            [self.option_format(event_key, o, i) for i, o in enumerate(self.options)]
+            [self.option_format(event_key, o, i) for i, o in enumerate(self.options)],
+            self
         )))
     def trigger_event(self):
         pass

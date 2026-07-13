@@ -6,13 +6,13 @@ from ck3_script_generator.ck3_backend_definitions.event import *
 from effects import *
 
 GalTestEvent = EventNamespace("gal_event_intro_scene", [
-Event(1, EventType.character_event, "court", [
+Event("0001", EventType.character_event, theme="court", portraits=[
         Portrait(PortraitPos.left_portrait, "root", "flirtation"),
         Portrait(PortraitPos.right_portrait, "scope:recipient", "interested_left"),
     ],
-    "My Galgame Title",
-    "My Galgame 初始互动界面",
-    [
+    title="My Galgame Title",
+    description="My Galgame 初始互动界面",
+    options=[
         Option("增加5好感", [
             Scope("scope:recipient", ChangeVariableAction("gal_attraction", "add", 5)),
             LiteralAction("# Some Other Action"),
@@ -27,13 +27,13 @@ Event(1, EventType.character_event, "court", [
         Option("结束事件"),
     ]
 ),
-Event(2, EventType.character_event, "court", [
+Event("0002", EventType.character_event, theme="court", portraits=[
         Portrait(PortraitPos.left_portrait, "root", "flirtation"),
         Portrait(PortraitPos.right_portrait, "scope:recipient", "interested_left"),
     ],
-    "My Galgame Title",
-    "My Galgame 初始互动界面",
-    [
+    title="My Galgame Title",
+    description="My Galgame 初始互动界面",
+    options=[
         Option("结束事件"),
         Option("结束My Galgame互动", Scope("scope:recipient", gal_effect_disable_my_galgame())),
     ]

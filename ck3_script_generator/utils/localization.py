@@ -4,28 +4,28 @@ from typing import TypeAlias
 from enum import StrEnum
 
 class Language(StrEnum):
-    Chinese = "simp_chinese"
-    English = "english"
+    simp_chinese = "simp_chinese"
+    english = "english"
 
-DEFAULT_LOCALIZATION_TARGET = Language.Chinese
+DEFAULT_LOCALIZATION_TARGET = Language.simp_chinese
 
 class Localization:
     _key: str
     """ key是由script generator自动设置的，在编写生成脚本时无需手动设置 """
-    chinese: str
+    simp_chinese: str
     english: str
-    def __init__(self, *, chinese: str, english: str=""):
+    def __init__(self, *, cn: str, en: str=""):
         """ 必须使用关键字参数 """
         self._key = None
-        self.chinese = chinese
-        self.english = english
+        self.simp_chinese = cn
+        self.english = en
     @property
     def key(self) -> str:
         return self._key
     def get_localization(self, language: Language) -> str:
         match language:
-            case Language.Chinese: return self.chinese
-            case Language.English: return self.english
+            case Language.simp_chinese: return self.simp_chinese
+            case Language.english: return self.english
     def get_localization_pair(self, language: Language) -> tuple[str, str]:
         return (self._key, self.get_localization(language))
     @classmethod
@@ -34,7 +34,9 @@ class Localization:
             return s
         else:
             """ 默认本地化语言是中文 """
-            return Localization(chinese=s)
+            return Localization(cn=s)
+
+LocalStr: TypeAlias = Localization
 
 LocalizedStr: TypeAlias = str|Localization
 """ 本地化文本，可以直接填写默认的本地化语言即中文，也可以填写Localization实现多语言本地化 """

@@ -14,12 +14,12 @@ Event("0001", EventType.character_event, theme="court", portraits=[
     description="My Galgame 初始互动界面",
     options=[
         Option("增加5好感", [
-            Scope("scope:recipient", ChangeVariableAction("gal_attraction", "add", 5)),
+            Scope("scope:recipient", ChangeVariableAction("gal_attraction", "+", 5)),
             LiteralAction("# Some Other Action"),
             TriggerEventAction("gal_event_intro_scene.0001"),
         ]),
         Option("减少5好感", [
-            Scope("scope:recipient", ChangeVariableAction("gal_attraction", "add", -5)),
+            Scope("scope:recipient", ChangeVariableAction("gal_attraction", "+", -5)),
             LiteralAction("# Some Other Action"),
             TriggerEventAction("gal_event_intro_scene.0001"),
         ]),
@@ -40,11 +40,11 @@ Event("0002", EventType.character_event, theme="court", portraits=[
 )
 ])
 
-def generate(path: str):
+""" def generate(path: str):
     GalTestEvent.generate(
         os.path.join(path, "events/gal_interaction_event.txt"),
         os.path.join(path, "localization/simp_chinese/event_localization/gal_interaction_event_l_simp_chinese.yml")
-    )
+    ) """
 
 
 

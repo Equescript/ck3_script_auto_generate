@@ -14,14 +14,17 @@ class Localization:
     """ key是由script generator自动设置的，在编写生成脚本时无需手动设置 """
     simp_chinese: str
     english: str
-    def __init__(self, *, cn: str, en: str=""):
+    def __init__(self, default: str="", *, key: str="", cn: str="", en: str=""):
         """ 必须使用关键字参数 """
-        self._key = None
-        self.simp_chinese = cn
-        self.english = en
+        self._key = key
+        self.simp_chinese = default if cn == "" else cn
+        self.english = default if en == "" else en
     @property
     def key(self) -> str:
         return self._key
+    def set_key(self, key: str):
+        if self._key == "":
+            self._key = key
     def get_localization(self, language: Language) -> str:
         match language:
             case Language.simp_chinese: return self.simp_chinese
@@ -35,8 +38,6 @@ class Localization:
         else:
             """ 默认本地化语言是中文 """
             return Localization(cn=s)
-
-LocalStr: TypeAlias = Localization
 
 LocalizedStr: TypeAlias = str|Localization
 """ 本地化文本，可以直接填写默认的本地化语言即中文，也可以填写Localization实现多语言本地化 """

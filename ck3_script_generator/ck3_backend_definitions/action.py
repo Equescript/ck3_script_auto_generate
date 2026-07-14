@@ -7,7 +7,7 @@ from .action_base import *
 class LiteralAction(Action):
     """ 这个表示一个字面意义的Action。
 
-    换句话说，如果你想写一个不属于生成脚本类的Action，就可以直接使用它。它不会对你输入的字符串做任何处理直接输出，等效于直接在P语言脚本里写代码。
+    换句话说，如果你想写一个不属于生成脚本类的Action，就可以直接使用它。它不会对你输入的字符串做任何处理，等效于直接在P语言脚本里写代码。
     """
     action: str
     def __init__(self, action: str):
@@ -64,7 +64,9 @@ class ChangeVariableAction(Action):
             value (Any): 可以接受字符串，数字等常见类型，但对于自定义类型，它必须已经实现__format__方法，以便被格式化为字符串的一部分。
         """
         self.variable_name = variable_name
-        self.operation = operation
+        match operation:
+            case "+": self.operation = "add"
+            case "*": self.operation = "multiply "
         self.value = value
     def execute(self):
         match self.operation:

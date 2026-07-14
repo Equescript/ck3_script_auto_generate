@@ -8,4 +8,5 @@ from .decision import *
 from .event import *
 from .interaction import *
 from .limit import *
+from .paradox_object import *
 from .scope import *

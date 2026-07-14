@@ -3,6 +3,7 @@ from typing import Any
 from enum import StrEnum
 from ..utils import *
 from .action_base import *
+from .paradox_object import *
 
 class PortraitPos(StrEnum):
     """ 参考https://ck3.paradoxwikis.com/Event_modding#Portrait_Positions """
@@ -17,7 +18,7 @@ class Portrait:
     portrait_pos: PortraitPos
     character: str
     animation: str|None
-    def __init__(self, portrait_pos: PortraitPos, character: str, animation: str=None):
+    def __init__(self, portrait_pos: PortraitPos, character: str, animation: str|None=None):
         self.portrait_pos = portrait_pos
         self.character = character
         self.animation = animation
@@ -37,14 +38,14 @@ class Option:
         """
         Args:
             name (LocalizedStr): 选项名称，可以直接写本地化字符串
-            action (list[Action] | Action | None): 选项会执行的操作，可以不填，默认为None，即不执行任何操作。
+            action (list[Action] | Action | None): 选项会执行的操作，可以不填，默认为None，即不执行任何操作
         """
-        self.name = Localization.from_LocalizedStr(name)
+        self.name = name if isinstance(name, Localization) else Localization(name)
         # 初始化的时候直接就把list[Action]转化成Actions类了，这样就可以都作为一个单独的Action处理，非常方便
         self.action = Actions(action) if isinstance(action, list) else action
         # self.event_ref = event_ref
     def format(self, indent_count: int, event_key: str, option_key: str) -> str:
-        self.name._key = f"{event_key}.option.{option_key}"
+        self.name.set_key(f"{event_key}.option.{option_key}")
         contents = [f"name = {self.name.key}"]
         if self.action is not None:
             contents.append(self.action.format(indent_count+1))
@@ -64,14 +65,19 @@ class Event:
     index: str
     event_type: EventType
     theme: str
+    portraits: list[Portrait]
     title: Localization
     description: Localization
-    portraits: list[Portrait]
+    immediate: Action|None
     options: list[Option]
+    orphan: bool
+    hidden: bool
     others: list[str]
 
     # localizations: dict[str, Localization]
-    def __init__(self, index: str, event_type: EventType, *, theme: str="default", portraits: Portrait|list[Portrait]=[], title: LocalizedStr, description: LocalizedStr, options: list[Option], others: list[str]=[]):
+    def __init__(self, index: str, event_type: EventType, *, theme: str="default", portraits: Portrait|list[Portrait]=[],
+                 title: LocalizedStr=Localization(), description: LocalizedStr=Localization(), immediate: list[Action]|Action|None=None,
+                 options: list[Option]=[], orphan: bool=False, hidden: bool=False, others: list[str]=[]):
         """
         Args:
             index (int): 事件索引，被格式化填充到四位，例如1会被填充成0001。
@@ -80,17 +86,24 @@ class Event:
             portraits (Portrait | list[Portrait]): 出现在事件界面的头像列表
             title (LocalizedStr): 标题，可以直接写本地化字符串
             description (LocalizedStr): 事件内容描述，可以直接写本地化字符串
+            immediate (list[Action] | Action | None): 事件会立即执行的Action，可以不填，默认为None，即不执行任何操作
             options (list[Option]): 事件选项
-            others (list[str]): 没有包括在
+            orphan (bool): 事件Flag，让事件孤立发生
+            hidden (bool): 事件Flag，让事件发生时对于玩家隐藏
+            others (list[str]): 其他想要加入Event的P语言内容，会直接格式化在P语言字符串中
         """
         # self.name_space = name_space
         self.index = index
         self.event_type = event_type
         self.theme = theme
-        self.title = Localization.from_LocalizedStr(title)
-        self.description = Localization.from_LocalizedStr(description)
         self.portraits = [portraits] if isinstance(portraits, Portrait) else portraits
+        self.title = title if isinstance(title, Localization) else Localization(title)
+        self.description = description if isinstance(description, Localization) else Localization(description)
+        self.immediate = Actions(immediate) if isinstance(immediate, list) else immediate
         self.options = options
+        self.orphan = orphan
+        self.hidden = hidden
+        self.others = others
 
         # self.localizations = {}
     def option_format(self, event_key: str, o: Option, i: int) -> str:
@@ -99,31 +112,37 @@ class Event:
         # 构建P语言的key
         # event_key = f"{name_space}.{self.index:04d}"
         event_key = f"{name_space}.{self.index}"
-        self.title._key = f"{event_key}.t"
-        self.description._key = f"{event_key}.desc"
-        return curly_braces(0, event_key, list(chain([
+        self.title.set_key(f"{event_key}.t")
+        self.description.set_key(f"{event_key}.desc")
+        return curly_braces(0, event_key, list(chain(
+            ["orphan = yes"] if self.orphan else [],
+            ["hidden = yes"] if self.hidden else [],
+            [
             f"type = {self.event_type}",
             f"theme = {self.theme}",
             f"title = {self.title.key}",
             f"desc = {self.description.key}",
             ], [""],
             [p.format(1) for p in self.portraits], [""],
+            [] if self.immediate is None else [curly_braces(1, "immediate", [self.immediate.format(2)]), ""],
             [self.option_format(event_key, o, i) for i, o in enumerate(self.options)],
-            self
+            self.others
         )))
     def trigger_event(self):
         pass
 
-class EventNamespace:
+class EventNamespace(ParadoxObject):
     name_space: str
-    events: dict[int, Event]
-    def __init__(self, name_space: str, events: list[Event]):
+    events: dict[str, Event]
+    other_localizations: list[Localization]
+    def __init__(self, name_space: str, events: list[Event], other_localizations: list[Localization]=[]):
         self.name_space = name_space
         self.events = dict([(e.index, e) for e in events])
+        self.other_localizations = other_localizations
     def format(self) -> str:
         return f"namespace = {self.name_space}\n\n"+"\n\n".join([e.format(self.name_space) for e in self.events.values()])
-    def localization(self, language: str) -> str:
-        return localization_yml(language, [kv for e in self.events.values() for kv in chain([e.title.get_localization_pair(language), e.description.get_localization_pair(language)], [option.name.get_localization_pair(language) for option in e.options])])
+    def localization(self, language: Language) -> str:
+        return localization_yml(language, list(chain([l.get_localization_pair(language) for l in self.other_localizations], [kv for e in self.events.values() for kv in chain([e.title.get_localization_pair(language), e.description.get_localization_pair(language)], [option.name.get_localization_pair(language) for option in e.options])])))
         # return [kv for e in self.events.values() for kv in list(e.localizations.items()).append([option.localization for option in e.options])]
     # def generate(self, event_path: str, localization_path: str):
     #     event_data = f"namespace = {self.name_space}\n\n"+"\n\n".join([e.format(self.name_space) for e in self.events.values()])

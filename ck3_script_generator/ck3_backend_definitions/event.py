@@ -76,7 +76,7 @@ class Event:
 
     # localizations: dict[str, Localization]
     def __init__(self, index: str, event_type: EventType, *, theme: str="default", portraits: Portrait|list[Portrait]=[],
-                 title: LocalizedStr=Localization(), description: LocalizedStr=Localization(), immediate: list[Action]|Action|None=None,
+                 title: LocalizedStr=Localization(ignore=True), description: LocalizedStr=Localization(ignore=True), immediate: list[Action]|Action|None=None,
                  options: list[Option]=[], orphan: bool=False, hidden: bool=False, others: list[str]=[]):
         """
         Args:
@@ -117,13 +117,11 @@ class Event:
         return curly_braces(0, event_key, list(chain(
             ["orphan = yes"] if self.orphan else [],
             ["hidden = yes"] if self.hidden else [],
-            [
-            f"type = {self.event_type}",
-            f"theme = {self.theme}",
-            f"title = {self.title.key}",
-            f"desc = {self.description.key}",
-            ], [""],
-            [p.format(1) for p in self.portraits], [""],
+            [f"type = {self.event_type}", f"theme = {self.theme}"],
+            [f"title = {self.title.key}"] if self.title.ignore == False else [],
+            [f"desc = {self.description.key}"] if self.description.ignore == False else [],
+            [""],
+            [p.format(1) for p in self.portraits], [] if len(self.portraits) == 0 else [""],
             [] if self.immediate is None else [curly_braces(1, "immediate", [self.immediate.format(2)]), ""],
             [self.option_format(event_key, o, i) for i, o in enumerate(self.options)],
             self.others
@@ -142,7 +140,13 @@ class EventNamespace(ParadoxObject):
     def format(self) -> str:
         return f"namespace = {self.name_space}\n\n"+"\n\n".join([e.format(self.name_space) for e in self.events.values()])
     def localization(self, language: Language) -> str:
-        return localization_yml(language, list(chain([l.get_localization_pair(language) for l in self.other_localizations], [kv for e in self.events.values() for kv in chain([e.title.get_localization_pair(language), e.description.get_localization_pair(language)], [option.name.get_localization_pair(language) for option in e.options])])))
+        return localization_yml(language, list(chain(
+            [l.get_localization_pair(language) for l in self.other_localizations],
+            [kv for e in self.events.values() for kv in chain(
+                [e.title.get_localization_pair(language)] if e.title.ignore == False else [], [e.description.get_localization_pair(language)] if e.description.ignore == False else [],
+                [option.name.get_localization_pair(language) for option in e.options]
+            )]
+        )))
         # return [kv for e in self.events.values() for kv in list(e.localizations.items()).append([option.localization for option in e.options])]
     # def generate(self, event_path: str, localization_path: str):
     #     event_data = f"namespace = {self.name_space}\n\n"+"\n\n".join([e.format(self.name_space) for e in self.events.values()])

@@ -10,12 +10,21 @@ class Language(StrEnum):
 DEFAULT_LOCALIZATION_TARGET = Language.simp_chinese
 
 class Localization:
+    ignore: bool
     _key: str
     """ key是由script generator自动设置的，在编写生成脚本时无需手动设置 """
     simp_chinese: str
     english: str
-    def __init__(self, default: str="", *, key: str="", cn: str="", en: str=""):
-        """ 必须使用关键字参数 """
+    def __init__(self, default: str="", *, key: str="", cn: str="", en: str="", ignore: bool=False):
+        """
+        Args:
+            default (str): 默认的本地化文本，如果其他语言的本地化文本为空，那么它会被替换为default
+            key (str): 本地化键名，默认情况下脚本会自动生成键值对，这个键名会覆盖掉原本的自动生成键名，允许你使用自定义键名
+            cn (str): simp_chinese语言本地化文本
+            en (str): english语言本地化文本
+            ignore(bool): 默认为False，设置为True会让脚本忽略这个本地化，从而不生成相应的键值对
+        """
+        self.ignore = ignore
         self._key = key
         self.simp_chinese = default if cn == "" else cn
         self.english = default if en == "" else en
